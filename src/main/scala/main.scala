@@ -1,6 +1,6 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.functions.{col, to_date}
+import scalaj.http.Http
 object main {
   def main(args:Array[String]): Unit ={
     Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
@@ -13,16 +13,15 @@ object main {
       .config("spark.master", "local[*]")
       .enableHiveSupport()
       .getOrCreate()
-    spark.conf.set("hive.exec.dynamic.partition.mode", "nonstrict")
     spark.sparkContext.setLogLevel("ERROR")
-
-    val df = spark.read.option("header","true")
-      .csv("files/time_series_covid_19_confirmed.csv")
-    val ans = df.select(col("Country/Region"),col("Province/State"),col("1/20/21").cast("int"))
-    val ans2 = ans.sort(col("1/20/21").desc)
-    ans2.show(100)
-
-
-
+    //lat long
+    val weather = ujson.read(Http("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/" +
+      "38.9697,-77.385/2020-10-01" +  // entering lat,long,date, in respective order
+      "?key=3QBYMGNC37EZLURWFBP6EXDCG").asString.body)
+    val temp = weather("days").toString()
+    import spark.implicits._
+    val tempTable = spark.read.json(Seq(temp).toDS)
+    tempTable.select("datetime","tempmax","tempmin").show()
+    spark.close()
   }
 }
