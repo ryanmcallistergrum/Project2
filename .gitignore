@@ -8,6 +8,7 @@
 *.iws
 *.orig
 *.rej
+.idea
 .svn
 .classpath
 .project
