@@ -16,7 +16,7 @@ object main {
     spark.sparkContext.setLogLevel("ERROR")
     //lat long
     val weather = ujson.read(Http("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/" +
-      "38.9697,-77.385/2020-10-01" +  // entering lat,long,date, in respective order
+      "38.9697,-77.385/2020-10-01/2020-10-10" +  // entering lat,long,date range, in respective order
       "?key=3QBYMGNC37EZLURWFBP6EXDCG").asString.body)
     val temp = weather("days").toString()
     import spark.implicits._
