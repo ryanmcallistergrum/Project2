@@ -9,15 +9,15 @@ object main {
     System.setProperty("hadoop.home.dir", "C:/hadoop")
     val spark = SparkSession
       .builder
-      .appName("hello hive")
-      .config("spark.master", "local")
+      .appName("Covid Analyze App")
+      .config("spark.master", "local[*]")
       .enableHiveSupport()
       .getOrCreate()
     spark.conf.set("hive.exec.dynamic.partition.mode", "nonstrict")
     spark.sparkContext.setLogLevel("ERROR")
 
-    val df = spark.read.option("header",true)
-      .csv("src/main/files/covid_19_data.csv").na.fill(0).na.fill("")
+    val df = spark.read.option("header","true")
+      .csv("files/covid_19_data.csv").na.fill(0).na.fill("")
     val df3 = df.select( col("SNo"),to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"))
 
     val df4 = df.join(df3,df("SNo") === df3("SNo"),"inner" ).select(df("SNo"), col("Date"),
