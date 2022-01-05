@@ -15,14 +15,21 @@ object main {
       .enableHiveSupport()
       .getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
-    
+
     val coviddata = spark.read.option("header","true").csv("files/covid_19_data.csv")
     val maxdeath = coviddata.select(col("Country/Region"),col("Deaths").cast("Int"))
       .groupBy("Country/Region").sum("Deaths")
-    //Max 10 deaths by country
+    val popdata = spark.read.option("header","true").csv("files/population_by_country_2020.csv")
+    val question8 = maxdeath.join(popdata,coviddata("Country/Region") === popdata("Country"),"inner")
+      .select("Country","sum(Deaths)","Population")
+
+
+    //Question 5 Max 10 deaths by country
     maxdeath.sort(col("sum(Deaths)").desc).show(10)
-    //Least 10 deaths by country
+    //Question 6 Least 10 deaths by country
     maxdeath.sort(col("sum(Deaths)").asc).show(10)
+    //Question 8 correlation between deaths and population
+    question8.sort(col("Population").cast("Int").desc).show()
 
 
     spark.close()
