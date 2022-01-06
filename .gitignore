@@ -149,3 +149,4 @@ hs_err_pid*
 
 # CUSTOM ADDITIONS
 null/*
+.bsp
