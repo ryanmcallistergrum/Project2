@@ -30,8 +30,11 @@ object main {
     maxdeath.sort(col("sum(Deaths)").asc).show(10)
     //Question 8 correlation between deaths and population
     question8.sort(col("Population").cast("Int").desc).show()
-
-
+    //Question 9 Deaths per Capita worst vs best
+    import spark.implicits._
+    val deathcapita = question8.withColumn("Deaths Per Capita", $"sum(Deaths)" / $"Population")
+    val maxcapita = deathcapita.sort(col("Deaths Per Capita").desc).show()
+    val mincapita = deathcapita.sort(col("Deaths Per Capita").asc).show()
     spark.close()
 
 
