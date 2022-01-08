@@ -2,7 +2,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.functions.col
 
-object QueryLoader{
+class QueryLoader{
   private final val covidData : DataFrame = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
   private final val maxDeaths : DataFrame = covidData.select(col("Country/Region"),col("Deaths").cast("Int"))
     .groupBy("Country/Region").sum("Deaths")
@@ -55,17 +55,17 @@ object QueryLoader{
     covidData.sort(col("sum(Deaths)").asc)
   }
 
-  // 7. does temperature at this latitude affect cases?
+  // 7. Does temperature at this latitude affect cases?
   protected def question07() : DataFrame = {
     throw new NotImplementedError("Method question07 not implemented yet!");
   }
 
-  // 8. Does the size of hte population affect the number of deaths?
+  // 8. Does the size of the population affect the number of deaths?
   protected def question08() : DataFrame = {
     deathJoinPop.sort(col("Population").cast("Int").desc)
   }
 
-  // 9. Who is doing hte best and worst in terms of deaths per capita by country?
+  // 9. Who is doing the best and worst in terms of deaths per capita by country?
   protected def question09() : DataFrame = {
     val spark : SparkSession = getSparkSession();
     import spark.implicits._
