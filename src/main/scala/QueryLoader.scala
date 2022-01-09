@@ -1,12 +1,6 @@
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.functions.{col, log}
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.ml.stat.Correlation
-import org.apache.spark.ml.linalg.Matrix
-import org.apache.spark.mllib.linalg._
-import org.apache.spark.mllib.stat.Statistics
-import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions.col
 
 class QueryLoader{
   private final val covidData : DataFrame = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
@@ -14,22 +8,10 @@ class QueryLoader{
     .groupBy("Country/Region").sum("Deaths")
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
-    .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
+    .select("Country","sum(Deaths)","Population")
 
   def loadQuery(question : Int) : Unit = {
-    question match {
-      case 1 => question01()
-      case 2 => question02()
-      case 3 => question03()
-      case 4 => question04()
-      case 5 => question05()
-      case 6 => question06()
-      case 7 => question07()
-      case 8 => question08()
-      case 9 => question09()
-      case 10 => question10()
-      case 11 => question11()
-    }
+    throw new NotImplementedError("Method loadQuery not implemented yet!");
   }
 
   protected def getSparkSession() : SparkSession = {
@@ -94,15 +76,5 @@ class QueryLoader{
   // 10. How long do people take to die after a confirmed case?
   protected def question10() : DataFrame = {
     throw new NotImplementedError("Method question10 not implemented yet!");
-  }
-
-  // 11. What's the numerical correlation between population and deaths?
-  protected def question11() : DataFrame = {
-    println("before: ", deathJoinPop.stat.corr("Population", "sum(Deaths)"))
-    val modified = deathJoinPop
-      .withColumn("sum(Deaths)", log("sum(Deaths)"))
-      .withColumn("Population", log("Population"))
-    println("modified: ", modified.stat.corr("Population", "sum(Deaths)"))
-    deathJoinPop
   }
 }
