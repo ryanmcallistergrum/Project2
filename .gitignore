@@ -1,6 +1,7 @@
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,scala,sbt,apachehadoop
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,scala,sbt,apachehadoop
+.bsp
 
 ### ApacheHadoop ###
 *.iml
@@ -8,6 +9,7 @@
 *.iws
 *.orig
 *.rej
+.idea
 .svn
 .classpath
 .project
