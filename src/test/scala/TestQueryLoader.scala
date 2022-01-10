@@ -4,7 +4,7 @@ import org.scalatest.matchers.should
 
 class TestQueryLoader extends AnyFlatSpec with should.Matchers {
   object Test extends QueryLoader {
-    override def loadQuery(question : Int) : Unit = super.loadQuery(question)
+    override def loadQuery(question : Int) : DataFrame = super.loadQuery(question)
     override def getSparkSession() : SparkSession = super.getSparkSession()
     override def question01() : DataFrame = super.question01()
     override def question02() : DataFrame = super.question02()

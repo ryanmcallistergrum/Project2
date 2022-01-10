@@ -10,7 +10,7 @@ class QueryLoader{
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
 
-  def loadQuery(question : Int) : Unit = {
+  def loadQuery(question : Int) : DataFrame = {
     question match {
       case 1 => question01()
       case 2 => question02()
