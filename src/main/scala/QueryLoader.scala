@@ -1,18 +1,12 @@
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.functions.{col, log}
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.ml.stat.Correlation
-import org.apache.spark.ml.linalg.Matrix
-import org.apache.spark.mllib.linalg._
-import org.apache.spark.mllib.stat.Statistics
-import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
   private final val covidData : DataFrame = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
   private final val maxDeaths : DataFrame = covidData.select(col("Country/Region"),col("Deaths").cast("Int"))
     .groupBy("Country/Region").sum("Deaths")
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
+  private final val weatherData : DataFrame = getSparkSession().read.option("header", "true").csv("data/daily_weather_2020.csv")
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
 
