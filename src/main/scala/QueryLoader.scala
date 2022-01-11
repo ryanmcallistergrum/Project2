@@ -4,6 +4,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
   private final val covidData : DataFrame = parseCovidData().cache()
+  private final val oldCovid : DataFrame = oldParse().cache()
   private final val maxDeaths : DataFrame = covidData.select(col("Country/Region"),col("Deaths").cast("Int"))
     .groupBy("Country/Region").sum("Deaths")
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
@@ -12,6 +13,12 @@ class QueryLoader{
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
 
   private def parseCovidData(): DataFrame = {
+//
+//    df.withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
+//      .na.fill(0)
+//      .groupBy(col("ObservationDate"), col("Country/Region"), col("Province/State"))
+//      .sum("Confirmed", "Difference").orderBy("Country/Region", "ObservationDate")
+//      .orderBy("Country/Region", "Province/State", "ObservationDate")
     getSparkSession()
     .read.option("header","true")
     .csv("data/covid_19_data_cleaned.csv")
@@ -23,12 +30,30 @@ class QueryLoader{
       col("Confirmed").cast("long"),
       col("Deaths").cast("long"),
       col("Recovered").cast("long")
-    )
-    .withColumn(col(
-//      .filter(col("Province/State") === "Hunan")
+    ).withColumn("Diff", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
+    .orderBy("SNo")
+    .filter(col("Province/State") === "Hunan")
+  }
+
+
+  private def oldParse(): DataFrame = {
+    getSparkSession()
+      .read.option("header","true")
+      .csv("data/covid_19_data_cleaned.csv")
+      .select(
+        col("SNo").cast("long"),
+        to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"),
+        col("Province/State"),
+        col("Country/Region"),
+        col("Confirmed").cast("long"),
+        col("Deaths").cast("long"),
+        col("Recovered").cast("long")
+      )
+      .filter(col("Province/State") === "Hunan")
   }
 
   def loadQuery(question : Int) : DataFrame = {
+    oldCovid.show(20)
     question match {
       case 1 => question01()
       case 2 => question02()
@@ -113,8 +138,15 @@ class QueryLoader{
 //      col("Recovered").cast("long")
 //    )
 //      .withColumn("laggedConfirmed", lag("Confirmed", 1).over(Window.partitionBy().orderBy("Date")))
-    covidData.printSchema()
+//    covidData.printSchema()
+    covidData
 
+
+//    df.withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
+//      .na.fill(0)
+//      .groupBy(col("ObservationDate"), col("Country/Region"), col("Province/State"))
+//      .sum("Confirmed", "Difference").orderBy("Country/Region", "ObservationDate")
+//      .orderBy("Country/Region", "Province/State", "ObservationDate")
 //    var months = covidData.select( col("SNo"),to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"))
 //    months = df.join(months,df("SNo") === months("SNo"),"inner" ).select(df("SNo"), col("Date"),
 //      col("`Province/State`").alias("Province"), col("`Country/Region`").alias("Country"), col("Confirmed"),

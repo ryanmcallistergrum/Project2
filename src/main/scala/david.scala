@@ -15,7 +15,8 @@ import java.io.File
 object david {
   def main(args:Array[String]): Unit ={
     val ql = new QueryLoader()
-    ql.loadQuery(10).head(10)
+    ql.loadQuery(10).show(100)
+
 //    joinContinents()
 
   }
