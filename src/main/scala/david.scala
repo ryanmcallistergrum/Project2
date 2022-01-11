@@ -14,8 +14,9 @@ import java.io.File
 
 object david {
   def main(args:Array[String]): Unit ={
-    val ql = new QueryLoader()
-    ql.loadQuery(11)
+//    val ql = new QueryLoader()
+//    ql.loadQuery(11)
+    joinContinents()
 
   }
 
@@ -39,7 +40,7 @@ object david {
 
     val df = spark.read.option("header",true)
       .csv("data/covid_19_data_cleaned.csv").na.fill(0).na.fill("")
-    organize_by_country(df, spark)
+//    organize_by_country(df, spark)
 
     val cont = spark.read.option("header", true)
       .csv("data/continents.csv")
