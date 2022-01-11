@@ -9,6 +9,9 @@ class QueryLoader{
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
+  private final val countryByMonths : DataFrame = getSparkSession().read.option("header","true")
+    .csv("data/country_stats_monthly/monthly_country_stats.csv")
+
 
   def loadQuery(question : Int) : DataFrame = {
     question match {
@@ -59,12 +62,16 @@ class QueryLoader{
 
   // 5. What are the 10 max deaths by country?
   protected def question05() : DataFrame = {
-    maxDeaths.sort(col("sum(Deaths)").desc)
+    countryByMonths.withColumn("Deaths",col("sum(Deaths)").cast("Int"))
+      .groupBy("Country").max("Deaths")
+      .orderBy(col("max(Deaths)").desc).limit(10)
   }
 
   // 6. What are the 10 least deaths by country?
   protected def question06() : DataFrame = {
-    covidData.sort(col("sum(Deaths)").asc)
+    countryByMonths.withColumn("Deaths",col("sum(Deaths)").cast("Int"))
+      .groupBy("Country").min("Deaths")
+      .orderBy(col("min(Deaths)").asc).limit(10)
   }
 
   // 7. Do confirmed cases have any relationship to the day of the week?
