@@ -50,7 +50,7 @@ class TestQueryLoader extends AnyFlatSpec with should.Matchers {
     Test.question06().show(Int.MaxValue, false)
   }
 
-  "question07()" should "return a DataFrame showing does temperature at this latitude affect cases" in {
+  "question07()" should "return a DataFrame showing whether confirmed cases have any relationship to the day of the week" in {
     Test.question07().show(Int.MaxValue, false)
   }
 
