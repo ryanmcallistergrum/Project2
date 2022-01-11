@@ -82,7 +82,7 @@ class QueryLoader{
       .over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
       .na.fill(0)
       .withColumn("DayOfWeek", to_date(col("ObservationDate"), "MM/dd/yyyy"))
-      .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "F"))
+      .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "E"))
   }
 
   // 8. Does the size of the population affect the number of deaths?
