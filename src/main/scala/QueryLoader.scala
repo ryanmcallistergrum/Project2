@@ -30,7 +30,12 @@ class QueryLoader{
       col("Confirmed").cast("long"),
       col("Deaths").cast("long"),
       col("Recovered").cast("long")
-    ).withColumn("Diff", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
+    ).withColumn("Confirmed", coalesce(col("Confirmed")-lag("Confirmed", 1)
+      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
+    .withColumn("Deaths", coalesce(col("Deaths")-lag("Deaths", 1)
+      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Deaths")))
+    .withColumn("Recovered", coalesce(col("Recovered")-lag("Deaths", 1)
+      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Recovered")))
     .orderBy("SNo")
     .filter(col("Province/State") === "Hunan")
   }
