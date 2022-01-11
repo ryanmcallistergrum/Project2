@@ -15,10 +15,16 @@ import java.io.File
 object david {
   def main(args:Array[String]): Unit ={
     val query = new QueryLoader()
+//    query.loadQuery(10)
+//      .groupBy(col("Country/Region"))
+//      .sum("Confirmed", "Recovered", "Deaths")
+//      .orderBy(col("sum(Deaths)").desc).show(100)
+
     query.loadQuery(10)
-      .groupBy(col("Country/Region"))
-      .sum("Confirmed", "Recovered", "Deaths")
-      .orderBy(col("sum(Deaths)").desc).show(100)
+      .filter(col("Country/Region") === "Belgium" )
+      .filter(col("Deaths") < 0)
+//      .groupBy(col("Country/Region"))
+      .show(100)
 
 //    joinContinents()
 

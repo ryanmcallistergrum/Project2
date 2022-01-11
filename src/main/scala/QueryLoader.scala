@@ -14,22 +14,24 @@ class QueryLoader{
 
   def parseCovidData(): DataFrame = {
     getSparkSession()
-    .read.option("header","true")
-    .csv("data/covid_19_data_cleaned.csv")
-    .select(
-      col("SNo").cast("long"),
-      to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"),
-      col("Province/State"),
-      col("Country/Region"),
-      col("Confirmed").cast("long"),
-      col("Deaths").cast("long"),
-      col("Recovered").cast("long")
-    ).withColumn("Confirmed", coalesce(col("Confirmed")-lag("Confirmed", 1)
-      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
-    .withColumn("Deaths", coalesce(col("Deaths")-lag("Deaths", 1)
-      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Deaths")))
-    .withColumn("Recovered", coalesce(col("Recovered")-lag("Recovered", 1)
-      .over(Window.partitionBy("Province/State").orderBy("Date")), col("Recovered")))
+      .read.option("header","true")
+      .csv("data/covid_19_data_cleaned.csv")
+      .select(
+        col("SNo").cast("long"),
+        to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"),
+        col("Province/State"),
+        col("Country/Region"),
+        col("Confirmed").cast("long"),
+        col("Deaths").cast("long"),
+        col("Recovered").cast("long")
+      ).withColumn("Confirmed", coalesce(col("Confirmed")-lag("Confirmed", 1)
+        .over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
+      .withColumn("Deaths", coalesce(col("Deaths")-lag("Deaths", 1)
+        .over(Window.partitionBy("Province/State").orderBy("Date")), col("Deaths")))
+      .withColumn("Recovered", coalesce(col("Recovered")-lag("Recovered", 1)
+        .over(Window.partitionBy("Province/State").orderBy("Date")), col("Recovered")))
+      .filter(col("Province/State") == null)
+//    .na.fill("")
 //    .orderBy("SNo")
 
   }
@@ -48,11 +50,12 @@ class QueryLoader{
         col("Deaths").cast("long"),
         col("Recovered").cast("long")
       )
-      .filter(col("Province/State") === "Hunan")
+      .filter(col("Country/Region") === "Belgium" )
+//      .filter(col("Province/State") === "Hunan")
   }
 
   def loadQuery(question : Int) : DataFrame = {
-//    oldCovid.show(20)
+//    oldCovid.show(100)
     question match {
       case 1 => question01()
       case 2 => question02()
@@ -129,6 +132,7 @@ class QueryLoader{
 
   // 10. How long do people take to die after a confirmed case?
   protected def question10() : DataFrame = {
+    covidData.printSchema()
     covidData
   }
 
