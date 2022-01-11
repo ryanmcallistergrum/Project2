@@ -14,9 +14,9 @@ import java.io.File
 
 object david {
   def main(args:Array[String]): Unit ={
-//    val ql = new QueryLoader()
-//    ql.loadQuery(11)
-    joinContinents()
+    val ql = new QueryLoader()
+    ql.loadQuery(10).head(10)
+//    joinContinents()
 
   }
 
@@ -124,12 +124,6 @@ object david {
       orderBy("Date")), col("Confirmed"))).na.fill(0)
     months.withColumn("Increase in Cases", round( (col("Difference"))/ lag("Difference", 1).over(Window.partitionBy().
       orderBy("Date")), 3 ) ).na.fill(0).show()
-
-
-
-
-
-
   }
 
 }
