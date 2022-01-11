@@ -1,4 +1,5 @@
-import org.apache.spark.sql.functions.{col, log}
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
+import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
@@ -6,7 +7,6 @@ class QueryLoader{
   private final val maxDeaths : DataFrame = covidData.select(col("Country/Region"),col("Deaths").cast("Int"))
     .groupBy("Country/Region").sum("Deaths")
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
-  private final val weatherData : DataFrame = getSparkSession().read.option("header", "true").csv("data/daily_weather_2020.csv")
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
 
@@ -67,9 +67,22 @@ class QueryLoader{
     covidData.sort(col("sum(Deaths)").asc)
   }
 
-  // 7. Does temperature at this latitude affect cases?
+  // 7. Do confirmed cases have any relationship to the day of the week?
   protected def question07() : DataFrame = {
-    throw new NotImplementedError("Method question07 not implemented yet!");
+    val df : DataFrame = covidData.select(
+      col("ObservationDate"),
+      col("Country/Region"),
+      col("Confirmed").cast("long")
+    )
+    .withColumn("ObservationDate", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+
+    df.groupBy(col("ObservationDate"))
+      .sum("Confirmed").orderBy( "ObservationDate").
+      withColumnRenamed("sum(Confirmed)", "Confirmed").withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1)
+      .over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
+      .na.fill(0)
+      .withColumn("DayOfWeek", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+      .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "u"))
   }
 
   // 8. Does the size of the population affect the number of deaths?
