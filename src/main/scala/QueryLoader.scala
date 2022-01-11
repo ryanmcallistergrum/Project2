@@ -12,13 +12,7 @@ class QueryLoader{
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
 
-  private def parseCovidData(): DataFrame = {
-//
-//    df.withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
-//      .na.fill(0)
-//      .groupBy(col("ObservationDate"), col("Country/Region"), col("Province/State"))
-//      .sum("Confirmed", "Difference").orderBy("Country/Region", "ObservationDate")
-//      .orderBy("Country/Region", "Province/State", "ObservationDate")
+  def parseCovidData(): DataFrame = {
     getSparkSession()
     .read.option("header","true")
     .csv("data/covid_19_data_cleaned.csv")
@@ -34,10 +28,10 @@ class QueryLoader{
       .over(Window.partitionBy("Province/State").orderBy("Date")), col("Confirmed")))
     .withColumn("Deaths", coalesce(col("Deaths")-lag("Deaths", 1)
       .over(Window.partitionBy("Province/State").orderBy("Date")), col("Deaths")))
-    .withColumn("Recovered", coalesce(col("Recovered")-lag("Deaths", 1)
+    .withColumn("Recovered", coalesce(col("Recovered")-lag("Recovered", 1)
       .over(Window.partitionBy("Province/State").orderBy("Date")), col("Recovered")))
-    .orderBy("SNo")
-    .filter(col("Province/State") === "Hunan")
+//    .orderBy("SNo")
+
   }
 
 
@@ -58,7 +52,7 @@ class QueryLoader{
   }
 
   def loadQuery(question : Int) : DataFrame = {
-    oldCovid.show(20)
+//    oldCovid.show(20)
     question match {
       case 1 => question01()
       case 2 => question02()
@@ -135,47 +129,7 @@ class QueryLoader{
 
   // 10. How long do people take to die after a confirmed case?
   protected def question10() : DataFrame = {
-//    val dateLag = covidData.select(
-//      to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"),
-//      col("Country/Region"),
-//      col("Confirmed").cast("long"),
-//      col("Deaths").cast("long"),
-//      col("Recovered").cast("long")
-//    )
-//      .withColumn("laggedConfirmed", lag("Confirmed", 1).over(Window.partitionBy().orderBy("Date")))
-//    covidData.printSchema()
     covidData
-
-
-//    df.withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
-//      .na.fill(0)
-//      .groupBy(col("ObservationDate"), col("Country/Region"), col("Province/State"))
-//      .sum("Confirmed", "Difference").orderBy("Country/Region", "ObservationDate")
-//      .orderBy("Country/Region", "Province/State", "ObservationDate")
-//    var months = covidData.select( col("SNo"),to_date(col("ObservationDate"),"MM/dd/yyyy").alias("Date"))
-//    months = df.join(months,df("SNo") === months("SNo"),"inner" ).select(df("SNo"), col("Date"),
-//      col("`Province/State`").alias("Province"), col("`Country/Region`").alias("Country"), col("Confirmed"),
-//      col("Deaths"), col("Recovered"))
-//    months = months.withColumn("Confirmed",col("Confirmed").cast("int")).withColumn(
-//      "Deaths",col("Deaths").cast("int")
-//    ).withColumn(
-//      "Recovered",col("Recovered").cast("int")
-//    )
-//    months = months.groupBy("Date").sum("Confirmed", "Deaths", "Recovered").orderBy(col("Date").asc).withColumn("Mortality Rate",
-//      round(col("sum(Deaths)")/col("sum(Confirmed)"), 3)).withColumnRenamed("sum(Deaths)", "Deaths").
-//      withColumnRenamed("sum(Confirmed)", "Confirmed").withColumnRenamed("sum(Recovered)", "Recovered")
-//    months = months.select( date_format(col("Date"),"yyyy-MM").alias("Date"), col("Confirmed"), col("Deaths"), col("Recovered"))
-//    months = months.groupBy("Date").max("Confirmed", "Deaths", "Recovered").orderBy("Date").withColumnRenamed("max(Deaths)", "Deaths").
-//      withColumnRenamed("max(Confirmed)", "Confirmed").withColumnRenamed("max(Recovered)", "Recovered")
-//
-//    months = months.withColumn("Mortality Rate", round(col("Deaths")/col("Confirmed"), 3))
-//    val windowSpec = Window.partitionBy("Date").orderBy(col("Date").asc)
-//    months = months.withColumn("Spread Rate",round( (col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().
-//      orderBy("Date")))/ lag("Confirmed", 1).over(Window.partitionBy().
-//      orderBy("Date")), 3 )).withColumn("Difference", coalesce(col("Confirmed")- lag("Confirmed", 1).over(Window.partitionBy().
-//      orderBy("Date")), col("Confirmed"))).na.fill(0)
-//    months.withColumn("Increase in Cases", round( (col("Difference"))/ lag("Difference", 1).over(Window.partitionBy().
-//      orderBy("Date")), 3 ) ).na.fill(0).show()
   }
 
   // 11. What's the numerical correlation between population and deaths?

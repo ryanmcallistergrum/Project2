@@ -14,8 +14,11 @@ import java.io.File
 
 object david {
   def main(args:Array[String]): Unit ={
-    val ql = new QueryLoader()
-    ql.loadQuery(10).show(100)
+    val query = new QueryLoader()
+    query.loadQuery(10)
+      .groupBy(col("Country/Region"))
+      .sum("Confirmed", "Recovered", "Deaths")
+      .orderBy(col("sum(Deaths)").desc).show(100)
 
 //    joinContinents()
 
