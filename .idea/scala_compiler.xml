@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <profile name="sbt 1" modules="Desktop.Project2,Project2,Users.bdoan.Desktop.Project2,bdoan.Desktop.Project2,covid_9052" />
+  </component>
+</project>
