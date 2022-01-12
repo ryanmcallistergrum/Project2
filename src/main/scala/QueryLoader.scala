@@ -11,7 +11,8 @@ class QueryLoader{
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
   private final val countryByMonths : DataFrame = countryByMonth()
-
+  private final val continent = getSparkSession().read.option("header", true).csv("data/continents.csv")
+  private final val covidContinents = covidData.join(continent, "Country/Region")
 
   def loadQuery(question : Int) : DataFrame = {
     question match {
@@ -106,11 +107,14 @@ class QueryLoader{
     deathCapita.sort(col("deaths_per_capita").desc_nulls_last)
   }
 
-  // 10. How long do people take to die after a confirmed case?
+  // 10. How are continents related to covid deaths?
   protected def question10() : DataFrame = {
-    throw new NotImplementedError("Method question10 not implemented yet!");
+    covidContinents
+      .groupBy(col("Continent"))
+      .sum("Deaths")
+      .select(col("Continent"), col("sum(Deaths)"))
+      .orderBy(col("sum(Deaths)").desc)
   }
-
 
   protected def countryByMonth(): DataFrame ={
     var n_df = covidData.withColumn("Date", date_format(col("Date"),"yyyy-MM"))
@@ -130,7 +134,7 @@ class QueryLoader{
 
   }
   protected def initializeData(): DataFrame ={
-    getSparkSession().read.option("header","true").csv("data/covid_daily_differences.csv")
+     getSparkSession().read.option("header","true").csv("data/covid_daily_differences.csv")
       .withColumn("Date", to_date(col("Date")))
       .withColumn("Confirmed",col("Confirmed").cast("long"))
       .withColumn("Confirmed",col("Confirmed").cast("int"))
