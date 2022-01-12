@@ -84,7 +84,7 @@ class QueryLoader{
     .withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))
 
     df.groupBy(col("Date"))
-      .sum("Confirmed").orderBy( "ObservationDate").
+      .sum("Confirmed").orderBy( "Date").
       withColumnRenamed("sum(Confirmed)", "Confirmed").withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1)
       .over(Window.partitionBy().orderBy("Date")), col("Confirmed")))
       .na.fill(0)
