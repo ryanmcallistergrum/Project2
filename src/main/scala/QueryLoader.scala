@@ -106,7 +106,8 @@ class QueryLoader{
     val modified = deathJoinPop
       .withColumn("sum(Deaths)", log("sum(Deaths)"))
       .withColumn("Population", log("Population"))
-    modified.sort(col("Population").desc_nulls_last)
+    println("Correlation Value: "+modified.stat.corr("Population", "sum(Deaths)"))
+    modified.sort(col("Population").desc_nulls_last).filter(col("sum(Deaths)").isNotNull)
   }
 
   // 9. Who is doing the best and worst in terms of deaths per capita by country?
