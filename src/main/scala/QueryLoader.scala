@@ -90,6 +90,7 @@ class QueryLoader{
       .na.fill(0)
       .withColumn("DayOfWeek", to_date(col("Date"), "MM/dd/yyyy"))
       .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "E"))
+      .filter(col("Date").isNotNull)
   }
 
   // 8. What's the numerical correlation between population and deaths?
