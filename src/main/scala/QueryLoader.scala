@@ -1,5 +1,5 @@
 import org.apache.spark.sql.expressions.{Window, WindowSpec}
-import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when}
+import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when, round}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
@@ -10,6 +10,7 @@ class QueryLoader{
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
   private final val countryByMonths : DataFrame = countryByMonth()
+  private final val monthlyData:DataFrame = getMonthly()
 
 
   def loadQuery(question : Int) : DataFrame = {
@@ -41,22 +42,24 @@ class QueryLoader{
 
   // 1. When was the peak moment of the pandemic during the data period?
   protected def question01() : DataFrame = {
-    countryByMonths
+    monthlyData.select("Date", "`Mortality Rate`", "`Spread Rate`", "`Difference`").orderBy("Date")
+
   }
 
   // 2. When was the pandemic's maximums and minimums over the course of the year?
   protected def question02() : DataFrame = {
-    throw new NotImplementedError("Method question02 not implemented yet!");
+    monthlyData
   }
 
   // 3. How many total confirmed, deaths, and recovered by date?
   protected def question03() : DataFrame = {
-    throw new NotImplementedError("Method question03 not implemented yet!");
+
+    monthlyData.select("Date", "Confirmed", "Deaths", "Recovered").orderBy("Date")
   }
 
   // 4. What is the average (deaths / confirmed) by date?
   protected def question04() : DataFrame = {
-    throw new NotImplementedError("Method question04 not implemented yet!");
+    monthlyData.select("Date", "`Mortality Rate`").withColumn("Mortality Rate",round(col("`Mortality Rate`")*100, 2)).orderBy("Date")
   }
 
   // 5. What are the 10 max deaths by country?
@@ -127,13 +130,31 @@ class QueryLoader{
     n_df.withColumnRenamed("sum(Deaths)", "Deaths").
       withColumnRenamed("sum(Confirmed)", "Confirmed").withColumnRenamed("sum(Recovered)", "Recovered")
 
-    /*
-    .withColumn("sum(Recovered)", when(col("sum(Recovered)") < 0, 0))
-      .withColumn("sum(Deaths)", when(col("sum(Deaths)") < 0, 0))
-      .withColumn("sum(Confirmed)", when(col("sum(Confirmed)") < 0, 0))
-     */
 
-
+  }
+  def getMonthly():DataFrame = {
+    val covid = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
+    var months = covid.withColumn( "Date",to_date(col("Date"),"MM/dd/yyyy"))
+    months = months.withColumn("Confirmed",col("Confirmed").cast("int")).withColumn(
+      "Deaths",col("Deaths").cast("int")
+    ).withColumn(
+      "Recovered",col("Recovered").cast("int")
+    )
+    months = months.groupBy("Date").sum("Confirmed", "Deaths", "Recovered").orderBy(col("Date").asc).withColumn("Mortality Rate",
+      round(col("sum(Deaths)")/col("sum(Confirmed)"), 3)).withColumnRenamed("sum(Deaths)", "Deaths").
+      withColumnRenamed("sum(Confirmed)", "Confirmed").withColumnRenamed("sum(Recovered)", "Recovered")
+    months = months.select( date_format(col("Date"),"yyyy-MM").alias("Date"), col("Confirmed"), col("Deaths"), col("Recovered"))
+    months = months.groupBy("Date").max("Confirmed", "Deaths", "Recovered").orderBy("Date").withColumnRenamed("max(Deaths)", "Deaths").
+      withColumnRenamed("max(Confirmed)", "Confirmed").withColumnRenamed("max(Recovered)", "Recovered")
+    months = months.withColumn("Mortality Rate", round(col("Deaths")/col("Confirmed"), 3))
+    val windowSpec = Window.partitionBy("Date").orderBy(col("Date").asc)
+    months = months.withColumn("Spread Rate",round( (col("Confirmed")-lag("Confirmed", 1).over(Window.partitionBy().
+      orderBy("Date")))/ lag("Confirmed", 1).over(Window.partitionBy().
+      orderBy("Date")), 3 )).withColumn("Difference", coalesce(col("Confirmed")- lag("Confirmed", 1).over(Window.partitionBy().
+      orderBy("Date")), col("Confirmed"))).na.fill(0)
+    months.withColumn("Increase in Cases", round( (col("Difference"))/ lag("Difference", 1).over(Window.partitionBy().
+      orderBy("Date")), 3 ) ).na.fill(0)
+    months
 
   }
   protected def initializeData(): DataFrame ={
