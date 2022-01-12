@@ -77,18 +77,18 @@ class QueryLoader{
   // 7. Do confirmed cases have any relationship to the day of the week?
   protected def question07() : DataFrame = {
     val df : DataFrame = covidData.select(
-      col("ObservationDate"),
+      col("Date"),
       col("Country/Region"),
       col("Confirmed").cast("long")
     )
-    .withColumn("ObservationDate", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+    .withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))
 
-    df.groupBy(col("ObservationDate"))
+    df.groupBy(col("Date"))
       .sum("Confirmed").orderBy( "ObservationDate").
       withColumnRenamed("sum(Confirmed)", "Confirmed").withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1)
-      .over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
+      .over(Window.partitionBy().orderBy("Date")), col("Confirmed")))
       .na.fill(0)
-      .withColumn("DayOfWeek", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+      .withColumn("DayOfWeek", to_date(col("Date"), "MM/dd/yyyy"))
       .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "E"))
   }
 
