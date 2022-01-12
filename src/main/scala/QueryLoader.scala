@@ -1,6 +1,7 @@
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.types.DecimalType
-import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when, round}
+import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, round, to_date, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
@@ -31,6 +32,9 @@ class QueryLoader{
   }
 
   protected def getSparkSession() : SparkSession = {
+    Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
+    Logger.getLogger("org.spark-project").setLevel(Level.ERROR)
+    Logger.getLogger("org").setLevel(Level.ERROR);
     val spark : SparkSession = SparkSession
       .builder
       .appName("Covid Analyze App")
