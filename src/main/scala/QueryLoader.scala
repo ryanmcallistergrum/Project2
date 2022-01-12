@@ -1,16 +1,15 @@
 import org.apache.spark.sql.expressions.{Window, WindowSpec}
-import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date}
+import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
-  private final val covidData : DataFrame = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
+  private final val covidData : DataFrame = initializeData()
   private final val maxDeaths : DataFrame = covidData.select(col("Country/Region"),col("Deaths").cast("Int"))
     .groupBy("Country/Region").sum("Deaths")
   private final val popData : DataFrame = getSparkSession().read.option("header","true").csv("data/population_by_country_2020.csv")
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
-  private final val countryByMonths : DataFrame = getSparkSession().read.option("header","true")
-    .csv("data/covid_daily_differences.csv")
+  private final val countryByMonths : DataFrame = countryByMonth()
 
 
   def loadQuery(question : Int) : DataFrame = {
@@ -42,6 +41,7 @@ class QueryLoader{
 
   // 1. When was the peak moment of the pandemic during the data period?
   protected def question01() : DataFrame = {
+    countryByMonth()
     throw new NotImplementedError("Method question01 not implemented yet!");
   }
 
@@ -119,5 +119,32 @@ class QueryLoader{
       .withColumn("Population", log("Population"))
     println("modified: ", modified.stat.corr("Population", "sum(Deaths)"))
     deathJoinPop
+  }
+  protected def countryByMonth(): DataFrame ={
+    covidData.printSchema()
+    var n_df = covidData.withColumn("Date", date_format(col("Date"),"yyyy-MM"))
+    n_df = n_df.groupBy("Country/Region", "Date").sum("Confirmed", "Deaths", "Recovered")
+      .orderBy("Date").filter(col("Date").isNotNull)
+
+    n_df.withColumnRenamed("sum(Deaths)", "Deaths").
+      withColumnRenamed("sum(Confirmed)", "Confirmed").withColumnRenamed("sum(Recovered)", "Recovered")
+
+    /*
+    .withColumn("sum(Recovered)", when(col("sum(Recovered)") < 0, 0))
+      .withColumn("sum(Deaths)", when(col("sum(Deaths)") < 0, 0))
+      .withColumn("sum(Confirmed)", when(col("sum(Confirmed)") < 0, 0))
+     */
+
+
+
+  }
+  protected def initializeData(): DataFrame ={
+    getSparkSession().read.option("header","true").csv("data/covid_daily_differences.csv")
+      .withColumn("Confirmed",col("Confirmed").cast("int"))
+      .withColumn("Deaths",col("Deaths").cast("int"))
+      .withColumn("Recovered",col("Recovered").cast("int"))
+      .withColumn("Recovered", when(col("Recovered") < 0, 0).otherwise(col("Recovered")))
+      .withColumn("Deaths", when(col("Deaths") < 0, 0).otherwise(col("Deaths")))
+      .withColumn("Confirmed", when(col("Confirmed") < 0, 0).otherwise(col("Confirmed")))
   }
 }
