@@ -1,5 +1,4 @@
-import org.apache.spark.sql.expressions.{Window, WindowSpec}
-import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when}
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.types.DecimalType
 import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when, round}
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -13,7 +12,6 @@ class QueryLoader{
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
   private final val countryByMonths : DataFrame = countryByMonth()
   private final val monthlyData:DataFrame = getMonthly()
-
   private final val continent = getSparkSession().read.option("header", true).csv("data/continents.csv")
   private final val covidContinents = covidData.join(continent, "Country/Region")
 
@@ -129,11 +127,6 @@ class QueryLoader{
     n_df.withColumnRenamed("sum(Deaths)", "Deaths").
       withColumnRenamed("sum(Confirmed)", "Confirmed").withColumnRenamed("sum(Recovered)", "Recovered")
 
-    /*
-    .withColumn("sum(Recovered)", when(col("sum(Recovered)") < 0, 0))
-      .withColumn("sum(Deaths)", when(col("sum(Deaths)") < 0, 0))
-      .withColumn("sum(Confirmed)", when(col("sum(Confirmed)") < 0, 0))
-     */
 
   }
   def getMonthly():DataFrame = {
