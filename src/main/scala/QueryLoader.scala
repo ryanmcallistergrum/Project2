@@ -1,6 +1,7 @@
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.types.DecimalType
-import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when, round}
+import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, round, to_date, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
@@ -31,6 +32,9 @@ class QueryLoader{
   }
 
   protected def getSparkSession() : SparkSession = {
+    Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
+    Logger.getLogger("org.spark-project").setLevel(Level.ERROR)
+    Logger.getLogger("org").setLevel(Level.ERROR);
     val spark : SparkSession = SparkSession
       .builder
       .appName("Covid Analyze App")
@@ -81,19 +85,20 @@ class QueryLoader{
   // 7. Do confirmed cases have any relationship to the day of the week?
   protected def question07() : DataFrame = {
     val df : DataFrame = covidData.select(
-      col("ObservationDate"),
+      col("Date"),
       col("Country/Region"),
       col("Confirmed").cast("long")
     )
-    .withColumn("ObservationDate", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+    .withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))
 
-    df.groupBy(col("ObservationDate"))
-      .sum("Confirmed").orderBy( "ObservationDate").
+    df.groupBy(col("Date"))
+      .sum("Confirmed").orderBy( "Date").
       withColumnRenamed("sum(Confirmed)", "Confirmed").withColumn("Difference", coalesce(col("Confirmed")-lag("Confirmed", 1)
-      .over(Window.partitionBy().orderBy("ObservationDate")), col("Confirmed")))
+      .over(Window.partitionBy().orderBy("Date")), col("Confirmed")))
       .na.fill(0)
-      .withColumn("DayOfWeek", to_date(col("ObservationDate"), "MM/dd/yyyy"))
+      .withColumn("DayOfWeek", to_date(col("Date"), "MM/dd/yyyy"))
       .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "E"))
+      .filter(col("Date").isNotNull)
   }
 
   // 8. What's the numerical correlation between population and deaths?
