@@ -1,5 +1,6 @@
 import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, to_date, when}
+import org.apache.spark.sql.types.DecimalType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class QueryLoader{
@@ -24,7 +25,6 @@ class QueryLoader{
       case 8 => question08()
       case 9 => question09()
       case 10 => question10()
-      case 11 => question11()
     }
   }
 
@@ -92,17 +92,18 @@ class QueryLoader{
       .withColumn("DayOfWeek", date_format(col("DayOfWeek"), "E"))
   }
 
-  // 8. Does the size of the population affect the number of deaths?
+  // 8. What's the numerical correlation between population and deaths?
   protected def question08() : DataFrame = {
-    deathJoinPop.sort(col("Population").cast("Int").desc)
+    val modified = deathJoinPop
+      .withColumn("sum(Deaths)", log("sum(Deaths)"))
+      .withColumn("Population", log("Population"))
+    modified.sort(col("Population").desc_nulls_last)
   }
 
   // 9. Who is doing the best and worst in terms of deaths per capita by country?
   protected def question09() : DataFrame = {
-    val spark : SparkSession = getSparkSession();
-    import spark.implicits._
-    val deathCapita : DataFrame = deathJoinPop.withColumn("Deaths Per Capita", $"sum(Deaths)" / $"Population")
-    deathCapita.sort(col("Deaths Per Capita").desc)
+    val deathCapita : DataFrame = deathJoinPop.withColumn("deaths_per_capita", (col("sum(Deaths)") / col("Population")).cast(DecimalType(10,10)))
+    deathCapita.sort(col("deaths_per_capita").desc_nulls_last)
   }
 
   // 10. How long do people take to die after a confirmed case?
@@ -110,15 +111,7 @@ class QueryLoader{
     throw new NotImplementedError("Method question10 not implemented yet!");
   }
 
-  // 11. What's the numerical correlation between population and deaths?
-  protected def question11() : DataFrame = {
-    println("before: ", deathJoinPop.stat.corr("Population", "sum(Deaths)"))
-    val modified = deathJoinPop
-      .withColumn("sum(Deaths)", log("sum(Deaths)"))
-      .withColumn("Population", log("Population"))
-    println("modified: ", modified.stat.corr("Population", "sum(Deaths)"))
-    deathJoinPop
-  }
+
   protected def countryByMonth(): DataFrame ={
     var n_df = covidData.withColumn("Date", date_format(col("Date"),"yyyy-MM"))
     n_df = n_df.groupBy("Country/Region", "Date").sum("Confirmed", "Deaths", "Recovered")
