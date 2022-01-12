@@ -41,8 +41,7 @@ class QueryLoader{
 
   // 1. When was the peak moment of the pandemic during the data period?
   protected def question01() : DataFrame = {
-    countryByMonth()
-    throw new NotImplementedError("Method question01 not implemented yet!");
+    countryByMonths
   }
 
   // 2. When was the pandemic's maximums and minimums over the course of the year?
@@ -121,7 +120,6 @@ class QueryLoader{
     deathJoinPop
   }
   protected def countryByMonth(): DataFrame ={
-    covidData.printSchema()
     var n_df = covidData.withColumn("Date", date_format(col("Date"),"yyyy-MM"))
     n_df = n_df.groupBy("Country/Region", "Date").sum("Confirmed", "Deaths", "Recovered")
       .orderBy("Date").filter(col("Date").isNotNull)
@@ -140,6 +138,8 @@ class QueryLoader{
   }
   protected def initializeData(): DataFrame ={
     getSparkSession().read.option("header","true").csv("data/covid_daily_differences.csv")
+      .withColumn("Date", to_date(col("Date")))
+      .withColumn("Confirmed",col("Confirmed").cast("long"))
       .withColumn("Confirmed",col("Confirmed").cast("int"))
       .withColumn("Deaths",col("Deaths").cast("int"))
       .withColumn("Recovered",col("Recovered").cast("int"))
