@@ -127,7 +127,7 @@ class QueryLoader{
   }
 
   // https://towardsdatascience.com/what-is-benfords-law-and-why-is-it-important-for-data-science-312cb8b61048
-  // 11. How are the leading digits of our data distribution?
+  // 11. What are the leading digits of our data distribution?
   protected def question11(): DataFrame = {
     println(covidData.select(col("Deaths")).count())
     val d1 = covidData.select(col("Deaths").alias("Data"))
