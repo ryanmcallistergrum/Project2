@@ -12,9 +12,9 @@ class QueryLoader{
   private val deathJoinPop : DataFrame = maxDeaths.join(popData, covidData("Country/Region") === popData("Country"),"inner")
     .select(col("Country"),col("sum(Deaths)"),col("Population").cast("Int"))
   private final val countryByMonths : DataFrame = countryByMonth()
-  private final val monthlyData:DataFrame = getMonthly()
-  private final val continent = getSparkSession().read.option("header", true).csv("data/continents.csv")
-  private final val covidContinents = covidData.join(continent, "Country/Region")
+  private final val monthlyData : DataFrame = getMonthly()
+  private final val continent : DataFrame = getSparkSession().read.option("header", true).csv("data/continents.csv")
+  private final val covidContinents : DataFrame = covidData.join(continent, "Country/Region")
 
   def loadQuery(question : Int) : DataFrame = {
     question match {
@@ -127,7 +127,7 @@ class QueryLoader{
   }
 
   // https://towardsdatascience.com/what-is-benfords-law-and-why-is-it-important-for-data-science-312cb8b61048
-  // 11. How are the leading digits of our data distributed?
+  // 11. How are the leading digits of our data distribution?
   protected def question11(): DataFrame = {
     println(covidData.select(col("Deaths")).count())
     val d1 = covidData.select(col("Deaths").alias("Data"))
@@ -143,7 +143,7 @@ class QueryLoader{
       .orderBy(col("count").desc)
   }
 
-  protected def countryByMonth(): DataFrame ={
+  private def countryByMonth(): DataFrame ={
     var n_df = covidData.withColumn("Date", date_format(col("Date"),"yyyy-MM"))
     n_df = n_df.groupBy("Country/Region", "Date").sum("Confirmed", "Deaths", "Recovered")
       .orderBy("Date").filter(col("Date").isNotNull)
@@ -153,7 +153,7 @@ class QueryLoader{
 
 
   }
-  def getMonthly():DataFrame = {
+  private def getMonthly():DataFrame = {
     val covid = getSparkSession().read.option("header","true").csv("data/covid_19_data_cleaned.csv")
     var months = covid.withColumn( "Date",to_date(col("Date"),"MM/dd/yyyy"))
     months = months.withColumn("Confirmed",col("Confirmed").cast("int")).withColumn(
@@ -178,7 +178,7 @@ class QueryLoader{
     months
 
   }
-  protected def initializeData(): DataFrame ={
+  private def initializeData(): DataFrame ={
      getSparkSession().read.option("header","true").csv("data/covid_daily_differences.csv")
       .withColumn("Date", to_date(col("Date")))
       .withColumn("Confirmed",col("Confirmed").cast("long"))
