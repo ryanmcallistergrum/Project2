@@ -19,7 +19,8 @@ class TestQueryLoader extends AnyFlatSpec with should.Matchers {
   }
 
   "loadQuery(Int)" should "load the passed-in query into Zeppelin" in {
-    throw new NotImplementedError("loadQuery(Int) test not implemented yet!")
+    for(i : Int <- 1 to 10)
+      Test.loadQuery(i)
   }
 
   "getSparkSession()" should "return a SparkSession" in {
