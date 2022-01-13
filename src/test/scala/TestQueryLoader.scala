@@ -16,10 +16,11 @@ class TestQueryLoader extends AnyFlatSpec with should.Matchers {
     override def question08() : DataFrame = super.question08()
     override def question09() : DataFrame = super.question09()
     override def question10() : DataFrame = super.question10()
+    override def question11() : DataFrame = super.question11()
   }
 
   "loadQuery(Int)" should "load the passed-in query into Zeppelin" in {
-    for(i : Int <- 1 to 10)
+    for(i : Int <- 1 to 11)
       Test.loadQuery(i)
   }
 
@@ -65,5 +66,9 @@ class TestQueryLoader extends AnyFlatSpec with should.Matchers {
 
   "question10()" should "return a DataFrame showing how long do people take to die after a confirmed case" in {
     Test.question10().show(Int.MaxValue, false)
+  }
+
+  "question11()" should "return a DataFrame showing the leading digits of our data distribution" in {
+    Test.question11().show(Int.MaxValue, false)
   }
 }
