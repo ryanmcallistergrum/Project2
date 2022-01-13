@@ -1,4 +1,4 @@
-import org.apache.log4j.{Level, Logger}
+import org.apache.log4j._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.types.{DecimalType, StringType}
 import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, round, to_date, when}
@@ -17,7 +17,10 @@ class QueryLoader{
   private final val covidContinents : DataFrame = covidData.join(continent, "Country/Region")
 
   def loadQuery(question : Int) : DataFrame = {
-    question match {
+    getSparkSession().sparkContext.setLogLevel("INFO")
+    val logger = Logger.getLogger("QueryLoader")
+    val startTime : Long = System.currentTimeMillis()
+    val df : DataFrame = question match {
       case 1 => question01()
       case 2 => question02()
       case 3 => question03()
@@ -30,6 +33,9 @@ class QueryLoader{
       case 10 => question10()
       case 11 => question11()
     }
+    logger.info(s"Question $question took ${(System.currentTimeMillis() - startTime) / 1000d} seconds.")
+    getSparkSession().sparkContext.setLogLevel("ERROR")
+    df
   }
 
   protected def getSparkSession() : SparkSession = {
