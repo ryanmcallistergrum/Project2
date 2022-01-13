@@ -1,8 +1,8 @@
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.types.DecimalType
+import org.apache.spark.sql.types.{DecimalType, StringType}
 import org.apache.spark.sql.functions.{coalesce, col, date_format, lag, log, round, to_date, when}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession, functions}
 
 class QueryLoader{
   private final val covidData : DataFrame = initializeData()
@@ -28,6 +28,7 @@ class QueryLoader{
       case 8 => question08()
       case 9 => question09()
       case 10 => question10()
+      case 11 => question11()
     }
   }
 
@@ -123,6 +124,23 @@ class QueryLoader{
       .sum("Deaths")
       .select(col("Continent"), col("sum(Deaths)"))
       .orderBy(col("sum(Deaths)").desc)
+  }
+
+  // https://towardsdatascience.com/what-is-benfords-law-and-why-is-it-important-for-data-science-312cb8b61048
+  // 11. How are the leading digits of our data distributed?
+  protected def question11(): DataFrame = {
+    println(covidData.select(col("Deaths")).count())
+    val d1 = covidData.select(col("Deaths").alias("Data"))
+    val d2 = covidData.select(col("Confirmed").alias("Data"))
+    val d3 = covidData.select(col("Recovered").alias("Data"))
+    val allData = d1.union(d2).union(d3)
+    println(allData.count())
+    allData
+      .filter(col("Data").isNotNull)
+      .filter(col("Data") > 0)
+      .withColumn("Data", col("Data").cast(StringType).substr(0, 3).cast("long"))
+      .groupBy("Data").count()
+      .orderBy(col("count").desc)
   }
 
   protected def countryByMonth(): DataFrame ={
