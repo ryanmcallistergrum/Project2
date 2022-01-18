@@ -110,7 +110,8 @@ class QueryLoader{
 
   // 8. What's the numerical correlation between population and deaths?
   protected def question08() : DataFrame = {
-    val modified = deathJoinPop
+    val deathContinents = deathJoinPop.join(continent, deathJoinPop("Country") === continent("Country/Region")).drop("Country/Region")
+    val modified = deathContinents
       .withColumn("sum(Deaths)", log("sum(Deaths)"))
       .withColumn("Population", log("Population"))
     println("Correlation Value: "+modified.stat.corr("Population", "sum(Deaths)"))
