@@ -86,7 +86,7 @@ class QueryLoader{
     countryByMonths.withColumn("Deaths",col("Deaths").cast("Int"))
       .groupBy("Country/Region").sum("Deaths")
       .orderBy(col("sum(Deaths)").asc)
-      .filter(col("sum(Deaths)").isNotNull).limit(10)
+      .filter(col("sum(Deaths)").isNotNull)
   }
 
   // 7. Do confirmed cases have any relationship to the day of the week?
