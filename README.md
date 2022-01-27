@@ -1,32 +1,188 @@
 # Project2
-### Requirements
-- Create a Spark Application that processes COVID data
-- Your project 2 pitch should involve some analysis of COVID data. This is the central feature.
-- Send me a link to a git repo, have someone in the group manage git (but they can ask for help from me)
-- Produce one or more .jar files for your analysis. Multiple smaller jar files are preferred. Then you can run application using spark-submit.
-- 10 queries per group
-- find a trend
-- implement log4j or logging
-- use Zeppelin (graphics and visuals) for showing trends and data analysis
-- Implement Agile Scrum methodology for project work (choose Scrum Master who will serve as team lead, all communication with me funneled through this associate, and have daily scrum meetings, by end of day report blockers)
+## Project Description
+For Project2, my small group created a Spark application that processes COVID data. As part of this processing, we came up with 11 queries to analyze the data from different perspectives and visualized our findings in Apache Zeppelin.
 
-### Presentations
-- Bring a simple slide deck providing an overview of your results. You should present your results, a high level overview of the process used to achieve those results, and any assumptions and simplifications you made on the way to those results.
-- I may ask you to run an analysis on the day of the presentation, so be prepared to do so.
-- We'll have 20 minutes per group, so make sure your presentation can be covered in that time, focusing on the parts of your analysis you find most interesting.
-- Include a link to your github repository at the end of your slides
-
-
-### Technologies
+## Technologies Used
 - Apache Spark
 - Spark SQL
 - YARN
-- HDFS and/or S3
+- HDFS
 - Scala 2.12.10
 - Git + GitHub
 - Zeppelin
 
+## Features
+- Utilizes Spark DataFrames to create views of the COVID data for visualizing in Zeppelin.
 
-### Due Date
-- Presentations will take place on Monday, 1/18
-- Send Project proposal with MVP clearly labeled with 2-3 stretch goals by end of week (01/07/2022).
+## Getting Started
+- (Note, these instructions only support Windows 10 and above for Windows platforms)
+- First, download and install Git for your system
+  - For Windows, navigate to https://git-scm.com/download/win and install
+  - For Unix, use "sudo apt-get install git"
+- Run the following Git command where you would like to create a copy of the project repository using either Command Prompt or PowerShell in Windows, or the Terminal in Unix:
+  - git clone https://github.com/ryanmcallistergrum/Project2.git
+- Install Java
+  - For Windows, navigate to https://www.oracle.com/java/technologies/javase/javase8u211-later-archive-downloads.html and install
+  - For Unix, use "sudo apt-get install openjdk-8-jre-headless openjdk-8-jdk"
+- For Windows, enable WSL and install Ubuntu
+  - Go to Control Panel -> Programs -> Turn Windows features on or off
+  - Enable "Virtual Machine Platform", "Windows Subsystem for Linux", and then reboot
+  - Open the Microsoft Store and install "Ubuntu"
+    - Open it and complete initial setup
+- (The following steps will be for Ubuntu WSL for Windows and native Unix platforms)
+- Install Java (for Ubuntu WSL only) (refer to Unix instructions above)
+- Install Scala
+  - sudo apt-get install scala
+- Install Spark
+  - wget https://downloads.apache.org/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz
+  - tar --extract -f spark-3.1.2-bin-hadoop3.2.tgz
+  - sudo mv spark-3.1.2-bin-hadoop3.2 /opt/spark
+- Install Hadoop
+  - cd
+  - wget https://mirrors.estointernet.in/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz
+  - tar --extract -f hadoop-3.3.0.tar.gz
+- Install SSH
+  - sudo apt-get install ssh
+- Start SSH
+  - sudo service ssh restart
+- Setup Environment Variables
+  - vi ~/.bashrc
+  - Enter following into file (press i to enter Insert Mode)
+    - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+    - export HADOOP_HOME=~/hadoop-3.3.0
+    - export SPARK_HOME=/opt/spark
+    - export PYSPARK_PYTHON=/usr/bin/python3
+    - export PATH=$PATH:$HADOOP_HOME/bin:$SPARK_HOME/bin:$SPARK_HOME/sbin
+    - export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+    - export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
+  - Press Esc to exit Insert Mode
+  - Enter ":wq" to save the file and exit vi
+  - Enter "source ~/.bashrc" to initialize the changes
+- Edit etc/hadoop/core-site.xml
+  - vi $HADOOP_CONF_DIR/core-site.xml
+  - Enter the following into the file:
+    - \<configuration>
+         \<property>
+            \<name>hadoop.tmp.dir\</name>
+            \<value>/usr/local/Cellar/hadoop/hdfs/tmp\</value>
+            \<description>A base for other temporary directories.\</description>
+         \</property> 
+      \</configuration>
+      \<configuration>
+         \<property>
+            \<name>fs.defaultFS\</name>
+            \<value>hdfs://localhost:9000\</value>
+         \</property>
+      \</configuration>
+  - Save and exit using ":wq"
+- Edit etc/hadoop/hdfs-site.xml
+  - vi $HADOOP_CONF_DIR/hdfs-site.xml
+  - Enter the following into the file:
+    - \<configuration>
+         \<property>
+            \<name>dfs.replication\</name>
+            \<value>1\</value>
+         \</property>
+      \</configuration>
+  - Save and exit using ":wq"
+- Edit file etc/hadoop/mapred-site.xml
+  - vi $HADOOP_CONF_DIR/mapred-site.xml
+  - Enter the following into the file:
+    - \<configuration>
+         \<property>
+            \<name>mapred.job.tracker\</name>
+            \<value>localhost:9010\</value>
+         \</property>
+      \</configuration>
+      \<configuration> 
+         \<property>
+            \<name>mapreduce.framework.name\</name>
+            \<value>yarn\</value>
+         \</property>
+         \<property>
+            \<name>mapreduce.application.classpath\</name>
+            \<value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*\</value>
+         \</property>
+      \</configuration>
+  - Save and exit using ":wq"
+- Edit file etc/hadoop/yarn-site.xml
+  - vi $HADOOP_CONF_DIR/yarn-site.xml
+  - Enter the following into the file:
+    - \<configuration>
+         \<property>
+            \<name>yarn.nodemanager.aux-services\</name>
+            \<value>mapreduce_shuffle\</value>
+         \</property>
+         \<property>
+            \<name>yarn.nodemanager.env-whitelist\</name>
+            \<value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME\</value>
+         \</property>
+      \</configuration>
+  - Save and exit using ":wq"
+- Create Hadoop directories
+  - mkdir -p /home/hadoop/hadoopinfra/hdfs/namenode
+  - mkdir -p /usr/local/Cellar/hadoop/hdfs/tmp
+- Set permissions on Hadoop directories
+  - sudo chmod 777 /home/hadoop/hadoopinfra/hdfs/namenode
+  - sudo chmod -R 777 /usr/local/Cellar/hadoop/hdfs/tmp
+- Format the NameNode
+  - $HADOOP_HOME/bin/hdfs namenode -format
+- Verify HDFS Startup
+  - $HADOOP_HOME/sbin/start-dfs.sh
+  - $HADOOP_HOME/sbin/start-yarn.sh
+  - jps
+    - The following should show
+      - SecondaryNameNode
+      - DataNode
+      - ResourceManager
+      - NodeManager
+      - NameNode
+      - Jps
+- Install Zeppelin
+  - wget https://dlcdn.apache.org/zeppelin/zeppelin-0.10.0/zeppelin-0.10.0-bin-all.tgz
+  - tar --extract -f zeppelin-0.10.0-bin-all.tgz
+- Start Zeppelin
+  - ~/zeppelin-0.10.0-bin-all/bin/zeppelin-daemon.sh start
+  - Verify by navigating to http://localhost:8080
+- Copy JAR to HDFS
+  - For Windows
+    - In Project2 directory, navigate to target\\scala-2.12 and copy project2_2.12-0.1.jar to \\\\wsl$\\Ubuntu\\home\\USERNAME
+    - In Ubuntu WSL, execute "hdfs dfs -copyFromLocal ~/project2_2.12-0.1.jar /"
+  - For Unix
+    - Navigate to target\\scala-2.12 in Project2 directory and execute "hdfs dfs -copyFromLocal project2_2.12-0.1.jar /"
+- Configure Spark Interpreter in Zeppelin
+  - After navigating to http://localhost:8080, left-click the "anonymous" user in the upper-right and select "Interpreter"
+  - In the search bar, search for "Spark"
+    - In the resulting interpreter list, click "Edit" in the upper-right to enable editing the values
+    - Search for "spark.jars" and enter in the following:
+      - hdfs://localhost:9000/project2_2.12-0.1.jar
+
+## Usage
+- After setup, create a new Notebook in Zeppelin by selecting "Notebook" at the top and selecting "Create new note" in the list.
+- Afterwards, create a new paragraph and enter in the following to create a TempView for each question:
+  - %spark
+  - val loader = new QueryLoader
+  - loader.loadQuery(1).createOrReplaceTempView("question01")
+  - loader.loadQuery(2).createOrReplaceTempView("question02")
+  - loader.loadQuery(3).createOrReplaceTempView("question03")
+  - loader.loadQuery(4).createOrReplaceTempView("question04")
+  - loader.loadQuery(5).createOrReplaceTempView("question05")
+  - loader.loadQuery(6).createOrReplaceTempView("question06")
+  - loader.loadQuery(7).createOrReplaceTempView("question07")
+  - loader.loadQuery(8).createOrReplaceTempView("question08")
+  - loader.loadQuery(9).createOrReplaceTempView("question09")
+  - loader.loadQuery(10).createOrReplaceTempView("question10")
+  - loader.loadQuery(11).createOrReplaceTempView("question11")
+- Then, click the play button ("Run all paragraphs") in the top-left to load the views
+- You can now create new paragraphs to explore each question by entering the following, choosing the question you want to see, into new paragraphs and running them:
+  - %sql
+  - select * from question01
+
+## Contributors
+- The following batchmates contributed to the project:
+  - Bao Doan (https://github.com/baodoan95)
+  - David Carlson (https://github.com/David-Carlson)
+  - Jaime Hinojos (https://github.com/jaimehinojos18)
+
+## License
+- This project uses the following license: The Unlicense
