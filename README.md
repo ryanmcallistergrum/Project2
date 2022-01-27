@@ -1,5 +1,5 @@
 # Project2
-###Requirements:
+### Requirements
 - Create a Spark Application that processes COVID data
 - Your project 2 pitch should involve some analysis of COVID data. This is the central feature.
 - Send me a link to a git repo, have someone in the group manage git (but they can ask for help from me)
