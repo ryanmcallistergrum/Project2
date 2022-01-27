@@ -3,13 +3,13 @@
 For Project2, my small group created a Spark application that processes COVID data. As part of this processing, we came up with 11 queries to analyze the data from different perspectives and visualized our findings in Apache Zeppelin.
 
 ## Technologies Used
-- Apache Spark
-- Spark SQL
-- YARN
-- HDFS
-- Scala 2.12.10
+- Apache Spark - version 3.1.2
+- Spark SQL - version 3.1.2
+- YARN - version 3.3.0
+- HDFS - version 3.3.0
+- Scala - version 2.12.10
 - Git + GitHub
-- Zeppelin
+- Zeppelin - version 0.10.0
 
 ## Features
 - Utilizes Spark DataFrames to create views of the COVID data for visualizing in Zeppelin.
