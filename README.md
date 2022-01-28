@@ -155,12 +155,12 @@ For Project2, my small group created a Spark application that processes COVID da
   - After navigating to http://localhost:8080, left-click the "anonymous" user in the upper-right and select "Interpreter"
   - In the search bar, search for "Spark"
     - In the resulting interpreter list, click "Edit" in the upper-right to enable editing the values
-    - Search for "spark.jars" and enter in the following:
+    - Search for "spark.jars" and enter the following:
       - hdfs://localhost:9000/project2_2.12-0.1.jar
 
 ## Usage
 - After setup, create a new Notebook in Zeppelin by selecting "Notebook" at the top and selecting "Create new note" in the list.
-- Afterwards, create a new paragraph and enter in the following to create a TempView for each question:
+- Afterwards, create a new paragraph and enter the following to create a TempView for each question:
   - %spark
   - val loader = new QueryLoader
   - loader.loadQuery(1).createOrReplaceTempView("question01")
@@ -192,7 +192,7 @@ For Project2, my small group created a Spark application that processes COVID da
   - loader.loadQuery(9).createOrReplaceTempView("question09")
     - ![Q9 Graph](/TablesAndGraphs/Q9Graph.png?raw=true)
     - ![Q9 Table Best](/TablesAndGraphs/Q9TableBest.png?raw=true)
-    - ![Q9 Table Worst](/TablesAndGraphs/Q9TableWorst.png?raw=true)
+    - ![Q9 Table Worst](/TablesAndGraphs/Q9TableWorse.png?raw=true)
   - loader.loadQuery(10).createOrReplaceTempView("question10")
     - ![Q10 Graph](/TablesAndGraphs/Q10Graph.png?raw=true)
     - ![Q10 Table](/TablesAndGraphs/Q10Table.png?raw=true)
