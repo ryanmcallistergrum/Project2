@@ -68,8 +68,6 @@ For Project2, my small group created a Spark application that processes COVID da
             \<value>/usr/local/Cellar/hadoop/hdfs/tmp\</value>
             \<description>A base for other temporary directories.\</description>
          \</property> 
-      \</configuration>
-      \<configuration>
          \<property>
             \<name>fs.defaultFS\</name>
             \<value>hdfs://localhost:9000\</value>
