@@ -59,6 +59,13 @@ For Project2, my small group created a Spark application that processes COVID da
   - Press Esc to exit Insert Mode
   - Enter ":wq" to save the file and exit vi
   - Enter "source ~/.bashrc" to initialize the changes
+- Edit etc/hadoop/hadoop-env.sh
+  - vi $HADOOP_CONF_DIR/hadoop-env.sh
+  - Enter the following into the file:
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    - export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
+    - export HADOOP_HOME=/home/ryan/hadoop/hadoop-3.3.0
+    - export PATH=$PATH:$HADOOP_HOME/bin
 - Edit etc/hadoop/core-site.xml
   - vi $HADOOP_CONF_DIR/core-site.xml
   - Enter the following into the file:
