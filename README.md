@@ -63,17 +63,15 @@ For Project2, my small group created a Spark application that processes COVID da
   - vi $HADOOP_CONF_DIR/core-site.xml
   - Enter the following into the file:
     - \<configuration>
-         \<property>
-            \<name>hadoop.tmp.dir\</name>
-            \<value>/usr/local/Cellar/hadoop/hdfs/tmp\</value>
-            \<description>A base for other temporary directories.\</description>
-         \</property> 
-      \</configuration>
-      \<configuration>
-         \<property>
-            \<name>fs.defaultFS\</name>
-            \<value>hdfs://localhost:9000\</value>
-         \</property>
+        \<property>
+          \<name>hadoop.tmp.dir</name>
+          \<value>/usr/local/Cellar/hadoop/hdfs/tmp</value>
+          \<description>A base for other temporary directories.</description>
+        \</property>
+        \<property>
+          \<name>fs.defaultFS</name>
+          \<value>hdfs://localhost:9000</value>
+        \</property>
       \</configuration>
   - Save and exit using ":wq"
 - Edit etc/hadoop/hdfs-site.xml
@@ -90,20 +88,18 @@ For Project2, my small group created a Spark application that processes COVID da
   - vi $HADOOP_CONF_DIR/mapred-site.xml
   - Enter the following into the file:
     - \<configuration>
-         \<property>
-            \<name>mapred.job.tracker\</name>
-            \<value>localhost:9010\</value>
-         \</property>
-      \</configuration>
-      \<configuration> 
-         \<property>
-            \<name>mapreduce.framework.name\</name>
-            \<value>yarn\</value>
-         \</property>
-         \<property>
-            \<name>mapreduce.application.classpath\</name>
-            \<value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*\</value>
-         \</property>
+      \<property>
+        \<name>mapred.job.tracker</name>
+        \<value>localhost:9010</value>
+      \</property>
+      \<property>
+        \<name>mapreduce.framework.name</name>
+        \<value>yarn</value>
+      \</property>
+      \<property>
+        \<name>mapreduce.application.classpath</name>
+        \<value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/</value>
+      \</property>
       \</configuration>
   - Save and exit using ":wq"
 - Edit file etc/hadoop/yarn-site.xml
