@@ -88,20 +88,18 @@ For Project2, my small group created a Spark application that processes COVID da
   - vi $HADOOP_CONF_DIR/mapred-site.xml
   - Enter the following into the file:
     - \<configuration>
-         \<property>
-            \<name>mapred.job.tracker\</name>
-            \<value>localhost:9010\</value>
-         \</property>
-      \</configuration>
-      \<configuration> 
-         \<property>
-            \<name>mapreduce.framework.name\</name>
-            \<value>yarn\</value>
-         \</property>
-         \<property>
-            \<name>mapreduce.application.classpath\</name>
-            \<value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*\</value>
-         \</property>
+      \<property>
+        \<name>mapred.job.tracker</name>
+        \<value>localhost:9010</value>
+      \</property>
+      \<property>
+        \<name>mapreduce.framework.name</name>
+        \<value>yarn</value>
+      \</property>
+      \<property>
+        \<name>mapreduce.application.classpath</name>
+        \<value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/</value>
+      \</property>
       \</configuration>
   - Save and exit using ":wq"
 - Edit file etc/hadoop/yarn-site.xml
